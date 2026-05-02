@@ -13,4 +13,13 @@ export const demohomepage = (page: Page): Record<string, Locator> => ({
     bookstoreapp:   page.getByText('Book Store Application')
 })
 
+export const elementslocator = (page: Page): Record<string, Locator> => ({
+    textBox:        page.getByText('Text Box'),
+    fullName:       page.getByPlaceholder('Full Name', { exact: true }),
+    email:          page.getByPlaceholder('name@example.com', { exact: true }),
+    curradd:        page.getByPlaceholder('Current Address', { exact: true }),
+    permadd:        page.locator('//*[@id="permanentAddress"]'),
+    submitbtn:      page.getByText('Submit')
+})
+
 //
