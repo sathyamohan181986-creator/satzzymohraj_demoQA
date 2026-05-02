@@ -1,27 +1,17 @@
-import { Page } from '@playwright/test';
-import { LoginLocators } from '../locators/login';
+import { expect, Page } from '@playwright/test';
+import { demohomepage } from '../locators/login';
 
-export class LoginPage {
-  constructor(private page: Page) {}
+export class LoginPage {constructor(private page: Page) {}
 
-
-  async navigate(url: string) {
+//Navigate to DemoQA URL
+  async navigatedemoQAhomePage(url: string) {
     await this.page.goto(url);
   }
 
-  async enterUsername(username: string) {
-    await this.page.locator(LoginLocators.username).fill(username);
-  }
-
-  async enterPassword(password: string) {
-    await this.page.locator(LoginLocators.password).fill(password);
-  }
-
-  async selectCheckbox() {
-    await this.page.locator(LoginLocators.checkbox).click();
-  }
-
-  async clickSignIn() {
-    await this.page.locator(LoginLocators.signInBtn).click();
+//Validate the DemoQA home page and the title
+  async validatehomePageHeader(): Promise<void> {
+    const logo = this.page.locator('img[src*="Toolsqa"]');
+    await expect(logo).toBeVisible();
+    console.log(logo);
   }
 }

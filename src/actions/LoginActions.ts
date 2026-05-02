@@ -1,21 +1,18 @@
-import { Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
+import { demohomepage } from 'src/locators/login';
+import path from 'node:path';
 
 
 export class LoginActions {
   constructor(private page: Page) {}
 
-  async login(url: string, username: string, password: string) {
-    const loginPage = new LoginPage(this.page);
-
-    await loginPage.navigate(url);
-    await loginPage.enterUsername(username);
-    console.log("Username entered", username);
-    await loginPage.enterPassword(password);
-    console.log("Password entered", password);
-    await loginPage.selectCheckbox();
-    console.log("Checkbox selected");
-    await loginPage.clickSignIn();
-    console.log("Sign in button clicked");
+  async login(url: string) {
+    const homePage = new LoginPage(this.page);
+    
+    await homePage.navigatedemoQAhomePage(url);
+    //await this.page.pause();
+    await homePage.validatehomePageHeader();
+    await this.page.screenshot({ path: "Screenshot/DemoQA Page.png" });
   }
 }
