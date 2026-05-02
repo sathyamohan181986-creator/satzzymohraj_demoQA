@@ -84,16 +84,6 @@ DEMOQA/
 - Tests tagged with `@smoke` run on every push; `@regression` tests run on the daily scheduled pipeline.
 - Excel data is loaded at the start of data-driven tests — the spec iterates over active rows and runs each scenario as a named step.
 
-```typescript
-test('@smoke Validate DemoQA homepage loads correctly', async ({ page }) => {
-  const actions = new LoginActions(page);
-
-  await test.step('Navigate to DemoQA and validate header', async () => {
-    await actions.login('https://demoqa.com');
-  });
-});
-```
-
 ### 7. Playwright configuration (`playwright.config.ts`)
 - `baseURL` is read from `.env.qa` or `.env.staging` via `dotenv`, so switching environments requires only an `ENV=staging` prefix.
 - `reporter` is set to `['html', { open: 'always' }]` so the report opens automatically after every local run.
