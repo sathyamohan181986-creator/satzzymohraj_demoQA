@@ -1,12 +1,19 @@
+
 # satzzymohraj_demoQA
 Playwright/TypeScript Automation on DEMOQA Website
+=======
+>>>>>>> 501a2a5 (Resolved README conflict)
 # Playwright Hybrid “Lite” (Drop-in)
 
 A **minimal, resilient** keyword-data-driven runner for Playwright, designed to avoid ESM/xlsx pitfalls by converting Excel → JSON **before** tests.
 
 ## Why this is stable
 
+
 Excel → JSON happens in a **Node CommonJS helper** (`tools/xlsx_to_json.cjs`) using `XLSX.readFile(...)` (official Node usage).No ESM quirks.
+=======
+Excel → JSON happens in a **Node CommonJS helper** (`tools/xlsx_to_json.cjs`) using `XLSX.readFile(...)` (official Node usage). No ESM quirks.
+>>>>>>> 501a2a5 (Resolved README conflict)
 
 Playwright runs TypeScript tests **out of the box** — no build step required.
 
