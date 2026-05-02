@@ -6,7 +6,7 @@ This repository automates the **DemoQA** website (https://demoqa.com) using **Pl
 
 ---
 
-## Folder structure explained
+## Folder structure explained - Page Object Model
 
 ```
 DEMOQA/
@@ -57,80 +57,28 @@ DEMOQA/
 - Configured `playwright.config.ts` with base URL (`https://demoqa.com`), timeout settings, multi-browser projects (Chromium, Firefox, WebKit), and reporters (HTML + Allure).
 - Configured `tsconfig.json` with strict TypeScript settings and path aliases (`@pages/*`, `@utils/*`) for clean imports.
 
-### 2. Locators (`src/locators/login.ts`)
-- Created a locator factory function that accepts a `Page` object and returns a `Record<string, Locator>` map.
-- Used Playwright locator strategies — `getByRole()`, `getByText()`, `locator('#id')`, `locator('.class')` — to locate elements such as the header image, navigation cards, and form inputs.
+### 2. Locators (`src/locators/*.ts`)
+- Used Playwright locator strategies — `getByRole()`, `getByText()`, `locator('#id')`, `locator('.class')` etc. — to locate elements such as the header image, navigation cards, and form inputs.
 - Keeping locators in a dedicated file means if the UI changes, only this file needs updating — not every page or test.
 
-```typescript
-export const demohomepage = (page: Page): Record<string, Locator> => ({
-  header: page.getByRole('img', { name: 'Toolsqa' }),
-  elementsCard: page.getByText('Elements'),
-});
-```
-
-### 3. Page Object class (`src/pages/LoginPage.ts`)
-- Created a `LoginPage` class that receives a `Page` object in its constructor.
-- Implemented a `navigatedemoQAhomePage(url: string)` method that calls `page.goto(url)` with `waitUntil: 'networkidle'` to ensure the page is fully loaded before interacting.
-- Implemented a `validatehomePageHeader()` assertion method using `expect(this.page).toHaveTitle(/demoqa/i)` to verify the page title.
+### 3. Page Object class (`src/pages/*.ts`)
+- Created a page class that receives a `Page` object in its constructor.
+- Implemented a method that calls to ensure the page is fully loaded before interacting.
+- Implemented an assertion method using to verify the page title.
 - Implemented a `screenshot()` helper to capture the current page state and save it to the `Screenshot/` folder.
 - All waits are handled by Playwright's built-in auto-waiting — no explicit `sleep()` calls needed.
 
-```typescript
-export class LoginPage {
-  constructor(private page: Page) {}
-
-  async navigatedemoQAhomePage(url: string): Promise<void> {
-    await this.page.goto(url, { waitUntil: 'networkidle' });
-  }
-
-  async validatehomePageHeader(): Promise<void> {
-    await expect(this.page).toHaveTitle(/demoqa/i);
-  }
-}
-```
-
-### 4. Actions class (`src/actions/LoginActions.ts`)
-- Created a `LoginActions` class that imports `LoginPage` and composes the full login/navigation workflow in a single `login(url)` method.
+### 4. Actions class (`src/actions/*.ts`)
+- Created an action class that imports `page` and composes the full workflow in a single method.
 - This layer separates **what the test does** (business flow) from **how the page works** (page object interactions).
-- The action class calls page object methods in sequence: navigate → validate header → take screenshot.
-
-```typescript
-export class LoginActions {
-  constructor(private page: Page) {}
-
-  async login(url: string) {
-    const homePage = new LoginPage(this.page);
-    await homePage.navigatedemoQAhomePage(url);
-    await homePage.validatehomePageHeader();
-    await this.page.screenshot({ path: 'Screenshot/DemoQA Page.png' });
-  }
-}
-```
+- The action class calls page object methods in sequence: navigate/actions → validations → take screenshot.
 
 ### 5. Excel test data (`src/test_data/`)
 - `data.xlsx` — Holds test data in rows. Each sheet corresponds to a test module. A `RunFlag` column (`Y`/`N`) controls which rows are active.
 - `testdata.ts` — Defines a TypeScript interface that mirrors the Excel columns, giving type safety when reading data in tests.
 - `src/utils/excelreader.ts` — A utility class using `ExcelJS` to open `data.xlsx`, read the specified sheet, filter rows where `RunFlag = 'Y'`, and return typed data objects ready for use in tests.
 
-```typescript
-// testdata.ts — interface matching Excel columns
-export interface LoginTestData {
-  RunFlag: string;
-  TestCase: string;
-  URL: string;
-  ExpectedTitle: string;
-}
-```
-
-```typescript
-// excelreader.ts — reads and filters active rows
-const workbook = new ExcelJS.Workbook();
-await workbook.xlsx.readFile('src/test_data/data.xlsx');
-// returns rows where RunFlag = 'Y'
-```
-
-### 6. Test spec (`tests/login.spec.ts`)
+### 6. Test spec (`tests/*.spec.ts`)
 - Used `@playwright/test`'s `test` and `expect` directly (or via custom fixtures).
 - Each test is wrapped in `test.step()` blocks to make Playwright's HTML report and Allure report display clear, readable step-by-step breakdowns.
 - Tests tagged with `@smoke` run on every push; `@regression` tests run on the daily scheduled pipeline.
