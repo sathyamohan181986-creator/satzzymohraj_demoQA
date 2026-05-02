@@ -4,6 +4,8 @@
 
 This repository automates the **DemoQA** website (https://demoqa.com) using **Playwright** and **TypeScript**. It follows the **Page Object Model (POM)** pattern to keep page-specific actions separate from test logic. Test data is driven from an **Excel file** (`data.xlsx`), and results are captured as **screenshots** and an **HTML report** via Playwright's built-in reporter and GitHub Actions CI/CD.
 
+This code automates the complete **DemoQA** site includes "Elements, Forms, Alerts, Frame, Windows, Widgets, Interactions & complete Book Store Application flow"
+
 ---
 
 ## Folder structure explained - Page Object Model
