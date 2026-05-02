@@ -6,7 +6,7 @@ This repository automates the **DemoQA** website (https://demoqa.com) using **Pl
 
 ---
 
-## Folder structure explained
+## Folder structure explained - Page Object Model
 
 ```
 DEMOQA/
