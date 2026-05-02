@@ -1,6 +1,6 @@
 import { expect, Page } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
-import { demohomepage } from 'src/locators/login';
+import { demohomepage } from 'src/locators/DemoQA';
 import path from 'node:path';
 
 

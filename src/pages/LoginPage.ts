@@ -1,5 +1,5 @@
 import { expect, Page } from '@playwright/test';
-import { demohomepage } from '../locators/login';
+import { demohomepage } from '../locators/DemoQA';
 
 export class LoginPage {constructor(private page: Page) {}
 
@@ -12,6 +12,5 @@ export class LoginPage {constructor(private page: Page) {}
   async validatehomePageHeader(): Promise<void> {
     const logo = this.page.locator('img[src*="Toolsqa"]');
     await expect(logo).toBeVisible();
-    console.log(logo);
   }
 }
