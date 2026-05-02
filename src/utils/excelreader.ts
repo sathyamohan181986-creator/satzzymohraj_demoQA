@@ -1,5 +1,6 @@
-import * as XLSX from 'xlsx';
-import path from 'path';
+import * as XLSX from 'xlsx'
+import * as path from 'path';
+
 
 export function readExcelData(){
     const filepath = path.join(__dirname, '../test_data/data.xlsx');
