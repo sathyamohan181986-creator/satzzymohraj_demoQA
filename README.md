@@ -1,102 +1,184 @@
+# DemoQA Practice – Code Summary (Playwright / TypeScript)
 
-# satzzymohraj_demoQA
-Playwright/TypeScript Automation on DEMOQA Website
-=======
+## What the project does
 
-# Playwright Hybrid “Lite” (Drop-in)
+This repository automates the **DemoQA** website (https://demoqa.com) using **Playwright** and **TypeScript**. It follows the **Page Object Model (POM)** pattern to keep page-specific actions separate from test logic. Test data is driven from an **Excel file** (`data.xlsx`), and results are captured as **screenshots** and an **HTML report** via Playwright's built-in reporter and GitHub Actions CI/CD.
 
-A **minimal, resilient** keyword-data-driven runner for Playwright, designed to avoid ESM/xlsx pitfalls by converting Excel → JSON **before** tests.
+---
 
-## Why this is stable
+## Folder structure explained
 
-
-Excel → JSON happens in a **Node CommonJS helper** (`tools/xlsx_to_json.cjs`) using `XLSX.readFile(...)` (official Node usage).No ESM quirks.
-=======
-Excel → JSON happens in a **Node CommonJS helper** (`tools/xlsx_to_json.cjs`) using `XLSX.readFile(...)` (official Node usage). No ESM quirks.
-
-
-Playwright runs TypeScript tests **out of the box** — no build step required.
-
-Screenshots are attached **after every keyword** using testInfo.attach(...) + page.screenshot() so they appear in the HTML report.
-
-## Put files here
 ```
-./data/TestScript.xlsx      # sheet: Test_Script
-./data/Data.xlsx            # sheets: Data ...
+DEMOQA/
+│
+├── .github/workflows/
+│   └── playwright.yml        # CI/CD pipeline — runs tests automatically on push/PR
+│
+├── Screenshot/
+│   └── DemoQA Page.png       # Screenshots captured during test execution
+│
+├── src/
+│   ├── actions/
+│   │   └── LoginActions.ts   # Business-level workflows — orchestrates page object calls
+│   │
+│   ├── locators/
+│   │   └── login.ts          # All element locators for the login/home page
+│   │
+│   ├── pages/
+│   │   └── LoginPage.ts      # Page Object class — navigation, interactions, assertions
+│   │
+│   ├── test_data/
+│   │   ├── data.xlsx         # Active Excel test data file used by tests
+│   │   └── testdata.ts       # TypeScript interface/model matching the Excel columns
+│   │
+│   └── utils/
+│       └── excelreader.ts    # Utility to read rows from data.xlsx using ExcelJS
+│
+├── test-results/             # Auto-generated — screenshots, videos, traces on failure
+├── playwright-report/        # Auto-generated — Playwright HTML report
+│
+├── tests/
+│   └── login.spec.ts         # Test spec — test cases for the login/home page flow
+│
+├── .gitignore
+├── package.json              # Project dependencies and npm scripts
+├── package-lock.json
+├── playwright.config.ts      # Playwright configuration — browsers, timeouts, reporters
+├── README.md
+└── tsconfig.json             # TypeScript compiler configuration
 ```
 
-## Run
-```bash
-    npm i
-    npx playwright install
-    npm test
-    npx playwright show-report
-```
-## How it works
+---
 
-1) `global.setup.ts` calls the converter once -> `runtime/testscript.json` + `runtime/data.json`
-2) `tests/runner.spec.ts` execute keywords read from Json.
-3) Keyword classes mirror your Java class names; keep **method names the same**.
-4) Fill `src/repo/objects.ts` with selectors and use `this.loc('key')`.
+## Step-by-step of the code implementation
 
-## //syntax of the test cases in playwright
+### 1. Project setup
+- Initialised a Node.js project (`package.json`) and added dependencies for `@playwright/test`, `typescript`, `exceljs`, and `allure-playwright`.
+- Configured `playwright.config.ts` with base URL (`https://demoqa.com`), timeout settings, multi-browser projects (Chromium, Firefox, WebKit), and reporters (HTML + Allure).
+- Configured `tsconfig.json` with strict TypeScript settings and path aliases (`@pages/*`, `@utils/*`) for clean imports.
 
-//test('First Playwright Testcase', async ()=> //function() when the function does not have name then we can use the syntax like this which will make the code simple
-// first arguement is test case name and second arguemnt name is function. Actual code is in second argument
-//{
-//Step1 - Open the browser
-//use await makes the step 2 waits until the step 1 is successful. When we use await then we have to make this as a async function.
-//Step2 - navigate
-//Step3 - CLick
-//});
+### 2. Locators (`src/locators/login.ts`)
+- Created a locator factory function that accepts a `Page` object and returns a `Record<string, Locator>` map.
+- Used Playwright locator strategies — `getByRole()`, `getByText()`, `locator('#id')`, `locator('.class')` — to locate elements such as the header image, navigation cards, and form inputs.
+- Keeping locators in a dedicated file means if the UI changes, only this file needs updating — not every page or test.
 
-//fixture is used to reuse test configurations and here we have fixture call browser async (browser)==>browser is a fixtures comes 
-// by default in playwright module and available globally to each and every test of the project.
-//this global fixtures are common for every annotations.
-//Whenever we are creating a test annotation there are some fixed set of fixtures which will be available automatically. 
-//This test belongs to playwright package so obviously this test also know there is something called browser and we no need to 
-// really declare anything on the top.
-//To use the browser inside the function, need to send the browser as a parameter to the test function first and that will 
-// passed on to inside the body (braces)
-//To represent and let this fucntion know that this specifically playwright feature, u have to wrap that in curly braces.
-//test('First Playwright Testcase', async ({browser})=> )if you don't give this as a curly braces then this is evaluated as a 
-// normal browser string value.
-//For playwright fixture it should be in a curly braces.
-
-//test('First Playwright test case', async ({browser})=>//to represent and let this function know that this is specifically playwright 
-// fixture we have to wrap that in curly braces. It is evaluated as a playwright fixture, if no curly braces then it s normal 
-// browser string value.
-//{
-//create new context. one instance
-//    chrome - plugin/cookies //information when you open a browser. Because in context all these are present.
-  //  const context = await browser.newContext();//store the variable const is a keyword and context is a variable
-    //const page = await context.newPage();
-    //await page.goto("https://rahulshettyacademy.com/loginpagePractise/");
-//});
-//If Id is present css-> tagname#id (or) #id
-//If class attribute is present css-> tagname.class (or) .class
-//Write css based on any Attribute  css-> parenttagname >> childtagname
-//If needs to write the locator based on text
-
-//Sample test script:
-import { test, expect } from '@playwright/test';
-
-test('has title', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
-
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Playwright/);
+```typescript
+export const demohomepage = (page: Page): Record<string, Locator> => ({
+  header: page.getByRole('img', { name: 'Toolsqa' }),
+  elementsCard: page.getByText('Elements'),
 });
+```
 
-test('get started link', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+### 3. Page Object class (`src/pages/LoginPage.ts`)
+- Created a `LoginPage` class that receives a `Page` object in its constructor.
+- Implemented a `navigatedemoQAhomePage(url: string)` method that calls `page.goto(url)` with `waitUntil: 'networkidle'` to ensure the page is fully loaded before interacting.
+- Implemented a `validatehomePageHeader()` assertion method using `expect(this.page).toHaveTitle(/demoqa/i)` to verify the page title.
+- Implemented a `screenshot()` helper to capture the current page state and save it to the `Screenshot/` folder.
+- All waits are handled by Playwright's built-in auto-waiting — no explicit `sleep()` calls needed.
 
-  // Click the get started link.
-  await page.getByRole('link', { name: 'Get started' }).click();
+```typescript
+export class LoginPage {
+  constructor(private page: Page) {}
 
-  // Expects page to have a heading with the name of Installation.
-  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+  async navigatedemoQAhomePage(url: string): Promise<void> {
+    await this.page.goto(url, { waitUntil: 'networkidle' });
+  }
+
+  async validatehomePageHeader(): Promise<void> {
+    await expect(this.page).toHaveTitle(/demoqa/i);
+  }
+}
+```
+
+### 4. Actions class (`src/actions/LoginActions.ts`)
+- Created a `LoginActions` class that imports `LoginPage` and composes the full login/navigation workflow in a single `login(url)` method.
+- This layer separates **what the test does** (business flow) from **how the page works** (page object interactions).
+- The action class calls page object methods in sequence: navigate → validate header → take screenshot.
+
+```typescript
+export class LoginActions {
+  constructor(private page: Page) {}
+
+  async login(url: string) {
+    const homePage = new LoginPage(this.page);
+    await homePage.navigatedemoQAhomePage(url);
+    await homePage.validatehomePageHeader();
+    await this.page.screenshot({ path: 'Screenshot/DemoQA Page.png' });
+  }
+}
+```
+
+### 5. Excel test data (`src/test_data/`)
+- `data.xlsx` — Holds test data in rows. Each sheet corresponds to a test module. A `RunFlag` column (`Y`/`N`) controls which rows are active.
+- `testdata.ts` — Defines a TypeScript interface that mirrors the Excel columns, giving type safety when reading data in tests.
+- `src/utils/excelreader.ts` — A utility class using `ExcelJS` to open `data.xlsx`, read the specified sheet, filter rows where `RunFlag = 'Y'`, and return typed data objects ready for use in tests.
+
+```typescript
+// testdata.ts — interface matching Excel columns
+export interface LoginTestData {
+  RunFlag: string;
+  TestCase: string;
+  URL: string;
+  ExpectedTitle: string;
+}
+```
+
+```typescript
+// excelreader.ts — reads and filters active rows
+const workbook = new ExcelJS.Workbook();
+await workbook.xlsx.readFile('src/test_data/data.xlsx');
+// returns rows where RunFlag = 'Y'
+```
+
+### 6. Test spec (`tests/login.spec.ts`)
+- Used `@playwright/test`'s `test` and `expect` directly (or via custom fixtures).
+- Each test is wrapped in `test.step()` blocks to make Playwright's HTML report and Allure report display clear, readable step-by-step breakdowns.
+- Tests tagged with `@smoke` run on every push; `@regression` tests run on the daily scheduled pipeline.
+- Excel data is loaded at the start of data-driven tests — the spec iterates over active rows and runs each scenario as a named step.
+
+```typescript
+test('@smoke Validate DemoQA homepage loads correctly', async ({ page }) => {
+  const actions = new LoginActions(page);
+
+  await test.step('Navigate to DemoQA and validate header', async () => {
+    await actions.login('https://demoqa.com');
+  });
 });
+```
 
+### 7. Playwright configuration (`playwright.config.ts`)
+- `baseURL` is read from `.env.qa` or `.env.staging` via `dotenv`, so switching environments requires only an `ENV=staging` prefix.
+- `reporter` is set to `['html', { open: 'always' }]` so the report opens automatically after every local run.
+- `screenshot: 'only-on-failure'` and `video: 'retain-on-failure'` capture evidence only when a test fails, keeping the `test-results/` folder clean.
+- `retries: 2` is set for CI runs to handle transient network flakiness on DemoQA.
 
-##
+### 8. CI/CD pipeline (`.github/workflows/playwright.yml`)
+- Triggers on push to `main`/`develop`, pull requests, and a daily schedule at 2 AM UTC.
+- Installs Node.js 20, runs `npm ci`, installs Playwright browsers, then executes `npm run test:smoke`.
+- Uploads `allure-results/` and `playwright-report/` as GitHub Actions artifacts retained for 30 days.
+- On merge to `main`, the Allure report is published to **GitHub Pages** automatically.
+
+---
+
+## How the code works together
+
+```
+login.spec.ts
+    │
+    ▼
+LoginActions.ts         ← orchestrates the full flow
+    │
+    ▼
+LoginPage.ts            ← page interactions and assertions
+    │
+    ├── locators/login.ts      ← element selectors (Playwright Locators)
+    └── utils/excelreader.ts   ← reads test data from data.xlsx
+```
+
+- **Locators** are isolated in `src/locators/` — if DemoQA changes a selector, only one file changes.
+- **Page Objects** (`src/pages/`) encapsulate all Playwright interactions for a particular page, keeping selectors and actions together and away from test logic.
+- **Actions** (`src/actions/`) compose page object calls into meaningful business workflows, so a test reads like plain English.
+- **Test specs** (`tests/`) focus purely on the scenario and assertion — they never touch raw `page.locator()` calls directly.
+- **ExcelJS** reads `data.xlsx` at runtime. The `RunFlag` column gives non-technical team members control over which rows execute without touching code.
+- **Playwright's auto-waiting** ensures every `click()`, `fill()`, and `expect()` call waits for the element to be stable before acting — eliminating the need for manual `waitForTimeout()` calls.
+- **Screenshots** are saved to `Screenshot/` on demand and automatically to `test-results/` on failure, giving clear visual evidence for every failed assertion.
