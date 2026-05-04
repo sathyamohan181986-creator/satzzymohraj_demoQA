@@ -1,7 +1,5 @@
-import { test } from '@playwright/test';
-import { LoginActions } from '../src/actions/LoginActions';
-import { ElementsActions } from 'src/actions/ElementsActions';
-import { readExcelData } from '../src/utils/excelreader';
+import { expect, Page, test } from '@playwright/test'
+import { readExcelData } from '@utils/excelreader';
 import { fillElementsPage } from '@test-data/testdata';
 import { LoginPage } from '../src/pages/LoginPage';
 import { ElementsPage } from '@pages/ElementsPage';
@@ -12,24 +10,31 @@ const data = fillElementsPage;
 const loginURL = testdata[0].pURL;
 //const baseData = testdata[0];
 
-test.describe('Elements Page Validation', ()=> {
-  test('Navigate to Elements page', async ({ page, context }) => {
-    const loginCheck = new LoginActions(page);
-    await loginCheck.login(loginURL);
-    const eltsVal = new ElementsActions(page);
-    await eltsVal.elements(page);
+test.describe('Access to DemoQA site', ()=> {
+  test('Login Test', async ({ page, context }) => {
+    const loginCheck = new LoginPage(page);
+    const loginURL = testdata[0].pURL;
+    await loginCheck.navigatedemoQAhomePage(loginURL);
 })
 
   test('Text Box Elements Page Validation', async ({ page }) => {
-    const loginelts = new LoginActions(page);
-    await loginelts.login(loginURL);
-    const textboxeltsVal = new ElementsActions(page);
-    await textboxeltsVal.elements(page);
-    await textboxeltsVal.textBoxelts(
+    const login = new LoginPage(page);
+    await login.navigatedemoQAhomePage(loginURL);
+
+    const TEXT_BOX = new ElementsPage(page);
+    await TEXT_BOX.clickElementsCard(page);
+    await TEXT_BOX.textBoxElts(
       data.textBoxElements.fullName,
       data.textBoxElements.emailId,
       data.textBoxElements.currAdd,
       data.textBoxElements.permAdd
     );
-    });
+      const TEXT_BOX_OUTPUT = new ElementsPage(page);
+      await TEXT_BOX_OUTPUT.assertOutputvalues(
+      data.textBoxElements.fullName,
+      data.textBoxElements.emailId,
+      data.textBoxElements.currAdd,
+      data.textBoxElements.permAdd
+    );
+  })
 })
