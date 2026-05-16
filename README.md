@@ -1,3 +1,11 @@
+# DemoQA Playwright Automation
+
+![Playwright Tests](https://github.com/YOUR_USERNAME/YOUR_REPO/actions/workflows/playwright.yml/badge.svg)
+![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
+![Playwright](https://img.shields.io/badge/Playwright-latest-orange)
+
+
 # DemoQA Practice – Code Summary (Playwright / TypeScript)
 
 ## What the project does
